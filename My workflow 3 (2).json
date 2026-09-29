@@ -1,0 +1,469 @@
+{
+  "name": "My workflow 3",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -432,
+        -144
+      ],
+      "id": "eff4e9bb-b870-47b3-8ec3-a6e771c5f29d",
+      "name": "Telegram Trigger",
+      "webhookId": "e28d5453-7366-499d-9c00-86aab19afdda",
+      "credentials": {
+        "telegramApi": {
+          "id": "RiMQ4ircBIHaBRLm",
+          "name": "Telegram account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    },
+                    "id": "e69ea8ec-f604-4777-a700-ab7d99c0893f"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "test"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a4231f77-dab9-40d6-a265-ab0b19a7bb6d",
+                    "leftValue": "={{ $json.message.voice.file_id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "voice"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -208,
+        -144
+      ],
+      "id": "d638ff9f-a07e-4e4b-92a1-e363feb21448",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "45720b5c-627a-497b-8c2e-1b7ada90f948",
+              "name": "text",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -64,
+        -416
+      ],
+      "id": "6b68c01f-9069-4b25-ac0c-58e807f92ce5",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}   {{ $json.content.parts[0].text }}",
+        "options": {
+          "systemMessage": "You are a helpful Telegram AI assistant.\n\nYour job is to handle Telegram messages correctly and respond naturally.\n\nMESSAGE TYPE RULES:\n\n1. If the user sends a TEXT message:\n   - Treat it as a text message.\n   - Read and understand the text directly.\n   - Respond based on the text.\n   - Do not treat it as a voice message.\n\n2. If the user sends a VOICE message:\n   - Treat it as a voice message.\n   - The voice message will be transcribed into text before reaching you.\n   - Use the transcribed text as the user's message.\n   - Do not assume the user originally typed the transcribed text.\n   - Do not mention transcription unless necessary.\n\n3. NEVER convert a text message into a voice message.\n\n4. NEVER treat a text message as a voice message.\n\n5. NEVER treat a voice message as a text message before transcription.\n\n6. The workflow determines whether the original Telegram message was TEXT or VOICE.\n   Respect that message type.\n\nLANGUAGE RULES:\n\n- Reply in the same language as the user's message.\n- If the user writes in Bangla, reply in Bangla.\n- If the user writes in English, reply in English.\n- If the user mixes Bangla and English, reply naturally in Bangla with necessary English terms.\n\nGENERAL RULES:\n\n- Be friendly, concise, and helpful.\n- For simple questions, give short answers.\n- For technical questions, provide step-by-step instructions.\n- If the transcribed voice text is unclear, ask the user to clarify.\n- Do not invent information.\n- Do not mention n8n, webhook, nodes, workflow, or internal automation unless the user specifically asks about them.\n- Do not repeat the user's entire message unnecessarily.\n- If the user says Hi, Hello, or Assalamu Alaikum, respond naturally and briefly.\n\nIMPORTANT:\nThe original message type must be preserved:\nTEXT → TEXT processing\nVOICE → VOICE processing → transcription → AI response\n\nDo not change or confuse the original message type."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        192,
+        -96
+      ],
+      "id": "88612649-8bdc-4d36-9c63-a1cd5cfc2c71",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        128
+      ],
+      "id": "2e6f96e3-301d-4a57-b882-27a13346c3d1",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "0bRAsvuHKLIcGYaG",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -272,
+        176
+      ],
+      "id": "7d3cef7d-4fa0-4a78-978b-cbef94c2e6fb",
+      "name": "Get a file",
+      "webhookId": "948bdfc9-5673-44d0-8882-da98073e922e",
+      "credentials": {
+        "telegramApi": {
+          "id": "RiMQ4ircBIHaBRLm",
+          "name": "Telegram account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3-flash-preview",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3-flash-preview"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        -32,
+        224
+      ],
+      "id": "212a2502-4662-47a5-9c4c-d295bf15e998",
+      "name": "Transcribe a recording",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "0bRAsvuHKLIcGYaG",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message?.text ? 'text' : 'voice' }}",
+                    "rightValue": "text",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "b2402489-60d8-4f71-a9c3-0cd520506056"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "aebd37b6-1b04-419a-b195-e263f8ee7aaf",
+                    "leftValue": "={{ $json.message?.text ? 'text' : 'voice' }}",
+                    "rightValue": "voice",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "voice"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        576,
+        -112
+      ],
+      "id": "9adf8043-d0dc-4151-b963-92405dbbe850",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $('AI Agent').item.json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        928,
+        -288
+      ],
+      "id": "49ffb340-9010-4228-9ff4-38fcf979063a",
+      "name": "Send a text message",
+      "webhookId": "b7c9c13b-99d1-431d-bc7d-09bd94fccb2a",
+      "credentials": {
+        "telegramApi": {
+          "id": "RiMQ4ircBIHaBRLm",
+          "name": "Telegram account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "model": "tts-1-hd",
+        "input": "={{ $('AI Agent').item.json.output }}",
+        "voice": "echo",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        784,
+        -16
+      ],
+      "id": "b4240fa1-dec8-4352-bb49-795141fa5bc1",
+      "name": "Generate audio",
+      "credentials": {
+        "openAiApi": {
+          "id": "VvzTCTaBydPsF1RZ",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAudio",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        992,
+        -16
+      ],
+      "id": "a51db17b-730a-4053-8c1e-89a2cc8186ca",
+      "name": "Send an audio file",
+      "webhookId": "785c75df-e902-464a-b59e-037c032e9625",
+      "credentials": {
+        "telegramApi": {
+          "id": "RiMQ4ircBIHaBRLm",
+          "name": "Telegram account 3"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Generate audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate audio": {
+      "main": [
+        [
+          {
+            "node": "Send an audio file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "81ee1a9a-7675-458b-9067-1e2ef82f1736",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5be23ac81fdca302f71961ed0e09ca3f4987c5ad1b90a4382e19839618378f7e"
+  },
+  "nodeGroups": [],
+  "id": "u5XQOKzFVOY4MDXM",
+  "tags": []
+}
